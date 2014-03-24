@@ -73,7 +73,7 @@ The pages will be available under the /<TC context path>/app/static_content/
 
 Sample usages:
 ==============
-- add static html widgets, e.g. Top Investigations, Build Status etc/
+- add static html widgets, e.g. Top Investigations, Build Status etc.
 
 
 

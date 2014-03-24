@@ -57,8 +57,6 @@ public class StaticPageContentController extends BasePageContentController {
   protected void writeResourceContent(@NotNull HttpServletRequest request,
                                       @NotNull HttpServletResponse response,
                                       @NotNull File file) throws IOException {
-    String path = file.getAbsolutePath();
-    response.setContentType(WebUtil.getMimeType(request, path));
     FileCopyUtils.copy(new FileReader(file), response.getWriter());
   }
 

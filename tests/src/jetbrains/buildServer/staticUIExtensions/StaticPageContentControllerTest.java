@@ -117,7 +117,8 @@ public class StaticPageContentControllerTest extends BaseControllerTestCase {
     myRequest.setRequestURI("bs", "/app/static_content/w1/widget1.html");
     doGet();
     String returnedContent = myResponse.getReturnedContent();
-    assertTrue(returnedContent.contains("ERROR: Content for StaticUIExtension plugin was not found. Requested resource: w1/widget1.html, error: Requested resource doesn't exist or not under the resource base folder."));
+    assertTrue(returnedContent.contains("ERROR: Content for StaticUIExtension plugin was not found. " +
+            "Requested resource: w1/widget1.html, error: Requested resource doesn't exist under the resource base folder."));
   }
 
 
@@ -127,6 +128,6 @@ public class StaticPageContentControllerTest extends BaseControllerTestCase {
     myRequest.setRequestURI("bs", "/app/static_content/../../w1/widget.html?p1=1&p2=2");
     doGet();
     String returnedContent = myResponse.getReturnedContent();
-    assertTrue(returnedContent.contains("Requested resource doesn't exist or not under the resource base folder."));
+    assertTrue(returnedContent.contains("Requested resource doesn't exist under the resource base folder."));
   }
 }

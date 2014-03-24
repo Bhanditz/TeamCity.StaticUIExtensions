@@ -77,8 +77,7 @@ public abstract class BasePageContentController extends BaseController {
       if (!legal) {
         throw new IllegalArgumentException("Requested resource doesn't exist under the resource base folder.");
       }
-      String path = file.getAbsolutePath();
-      response.setContentType(WebUtil.getMimeType(request, path));
+      response.setContentType(WebUtil.getMimeType(request, file.getName()));
       writeResourceContent(request, response, file);
     } catch (Exception e) {
       LOG.warn("Failed to retrieve file. Error: " + e.getMessage(), e);

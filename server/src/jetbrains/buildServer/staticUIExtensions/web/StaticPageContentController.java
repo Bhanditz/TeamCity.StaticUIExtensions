@@ -19,61 +19,44 @@ package jetbrains.buildServer.staticUIExtensions.web;
 
 import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.controllers.AuthorizationInterceptor;
-import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.staticUIExtensions.Configuration;
-import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
-import jetbrains.buildServer.web.util.WebUtil;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.web.servlet.ModelAndView;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 
-public class StaticPageContentController extends BaseController {
+public class StaticPageContentController extends StaticResourcesController {
 
   private static final Logger LOG = Logger.getInstance(StaticPageContentController.class.getName());
 
   private static final String PUBLIC_STATIC_CONTENT_PAGES_PATH = "/app/static_content/";
   private static final String FOLDER_NAME = "pages";
-  private static final String ENCODING = "UTF-8";
-
-  private final Configuration myConfig;
 
   public StaticPageContentController(@NotNull final AuthorizationInterceptor auth,
                                      @NotNull final WebControllerManager web,
                                      @NotNull final Configuration config) {
-    myConfig = config;
+    super();
+    final File container = new File(config.getIncludeFilesBase(), FOLDER_NAME);
+    if (!container.isDirectory() || !container.exists()) {
+      LOG.warn("Cannot found pages directory: " + container.getAbsolutePath());
+      LOG.warn("Static Page Controller will be useless.");
+    }
+    setProvider(new StaticResourcesController.ResourceProvider() {
+      @Nullable
+      public Resource getResourceForPath(@NotNull String path) {
+        path = path.replace(PUBLIC_STATIC_CONTENT_PAGES_PATH, "");
+        if (!container.isDirectory() || !container.exists()) {
+          return null;
+        }
+        return new FileSystemResource(new File(container, path));
+      }
+    });
     final String path = PUBLIC_STATIC_CONTENT_PAGES_PATH + "**";
     web.registerController(path, this);
     auth.addPathNotRequiringAuth(path);
   }
-
-  @Override
-  protected ModelAndView doHandle(@NotNull final HttpServletRequest request,
-                                  @NotNull final HttpServletResponse response) throws Exception {
-
-
-    String requestedResource = WebUtil.getPathFromUrl(WebUtil.getOriginalPathWithoutContext(request))
-            .replace(PUBLIC_STATIC_CONTENT_PAGES_PATH, "");
-
-    final char[] data;
-    try {
-      String requestedPath = myConfig.getIncludeFilesBase() + File.separator + FOLDER_NAME;
-      File file = new File(requestedPath, requestedResource);
-      data = FileUtil.loadFileText(file, ENCODING);
-      LOG.info("Static content requested: " + file.getAbsolutePath());
-      response.setContentType(WebUtil.getMimeType(request, file.getAbsolutePath()));
-      response.getWriter().print(data);
-    } catch (Exception e) {
-      LOG.warn("Failed to retrieve file " + e.getMessage(), e);
-      response.setContentType("text/plain");
-      response.getWriter().write("ERROR: Content for StaticUIExtensions plugin was not found. Requested resource: " + requestedResource + ", error: " + e.getMessage());
-      return null;
-    }
-    return null;
-  }
-
 }
 

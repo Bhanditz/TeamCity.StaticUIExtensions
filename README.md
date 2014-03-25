@@ -10,7 +10,7 @@ Apache 2.0
 
 Builds:
 =======
-Download the plugin from  http://teamcity.jetbrains.com/viewType.html?buildTypeId=bt334&tab=buildTypeStatusDiv
+Download the plugin from [teamcity.jetbrains.com]( http://teamcity.jetbrains.com/viewType.html?buildTypeId=TeamCityPluginsByJetBrains_StaticUiExtensionsAgainstTeamCity8)
 
 To build locally, open the project with IntelliJ IDEA, create the "plugin-zip" artifact. 
 You may also need to set up the TeamCityDistribution path variable in IDEA to point to the

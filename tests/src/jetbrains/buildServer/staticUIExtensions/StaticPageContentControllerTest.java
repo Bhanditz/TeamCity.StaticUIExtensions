@@ -145,4 +145,13 @@ public class StaticPageContentControllerTest extends BaseControllerTestCase {
     assertEquals(304, myResponse.getStatus());
     assertTrue(StringUtil.isEmpty(myResponse.getReturnedContent()));
   }
+
+  @Test
+  public void testIllegalAccess() throws Exception {
+    myRequest.setRequestURI("bs", "/app/static_content/../w1/widget.html");
+    myRequestDate = System.currentTimeMillis() - 10;
+    doGet();
+    assertEquals(404, myResponse.getStatus());
+    assertTrue(StringUtil.isEmpty(myResponse.getReturnedContent()));
+  }
 }

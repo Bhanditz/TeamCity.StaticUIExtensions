@@ -20,6 +20,7 @@ package jetbrains.buildServer.staticUIExtensions.web;
 import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.controllers.AuthorizationInterceptor;
 import jetbrains.buildServer.staticUIExtensions.Configuration;
+import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,7 +40,7 @@ public class StaticPageContentController extends StaticResourcesController {
                                      @NotNull final WebControllerManager web,
                                      @NotNull final Configuration config) {
     super();
-    final File container = new File(config.getIncludeFilesBase(), FOLDER_NAME);
+    final File container = FileUtil.getCanonicalFile(new File(config.getIncludeFilesBase(), FOLDER_NAME));
     if (!container.isDirectory() || !container.exists()) {
       LOG.warn("Cannot found pages directory: " + container.getAbsolutePath());
       LOG.warn("Static Page Controller will be useless.");
@@ -51,7 +52,12 @@ public class StaticPageContentController extends StaticResourcesController {
         if (!container.isDirectory() || !container.exists()) {
           return null;
         }
-        return new FileSystemResource(new File(container, path));
+        final File file = FileUtil.getCanonicalFile(new File(container, path));
+        if (!FileUtil.isAncestor(container, file, true)) {
+          // Trying to access something not under container
+          return null;
+        }
+        return new FileSystemResource(file);
       }
     });
     final String path = PUBLIC_STATIC_CONTENT_PAGES_PATH + "**";

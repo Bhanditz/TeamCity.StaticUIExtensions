@@ -17,10 +17,7 @@
 package jetbrains.buildServer.staticUIExtensions;
 
 import com.intellij.openapi.util.text.StringUtil;
-import jetbrains.buildServer.controllers.AuthorizationInterceptor;
-import jetbrains.buildServer.controllers.BaseController;
-import jetbrains.buildServer.controllers.BaseControllerTestCase;
-import jetbrains.buildServer.controllers.MockRequest;
+import jetbrains.buildServer.controllers.*;
 import jetbrains.buildServer.staticUIExtensions.web.StaticPageContentController;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
@@ -34,6 +31,7 @@ import org.testng.annotations.Test;
 
 import javax.servlet.ServletContext;
 import java.io.File;
+import java.lang.reflect.Constructor;
 
 @Test
 public class StaticPageContentControllerTest extends BaseControllerTestCase {
@@ -92,7 +90,31 @@ public class StaticPageContentControllerTest extends BaseControllerTestCase {
       allowing(auth);
     }});
 
-    return new StaticPageContentController(auth, web, config);
+    return new StaticPageContentController(auth, web, config, getHttpDownloadProcessor());
+  }
+
+  private HttpDownloadProcessor getHttpDownloadProcessor() {
+    final Class<HttpDownloadProcessor> clazz = HttpDownloadProcessor.class;
+    // TC 8.0: Constructor without parameters.
+    try {
+      final Constructor<HttpDownloadProcessor> constructor = clazz.getConstructor();
+      return constructor.newInstance();
+    } catch (Exception ignored) {
+    }
+    // TC 8.1 and probably newer versions: jetbrains.buildServer.artifacts.DigestCalculator required.
+    try {
+      final Class<?> dcc = HttpDownloadProcessor.class.getClassLoader().loadClass("jetbrains.buildServer.artifacts.DigestCalculator");
+      final Constructor<HttpDownloadProcessor> constructor = clazz.getConstructor(dcc);
+
+      final Class<?> sdcc = dcc.getClassLoader().loadClass("jetbrains.buildServer.artifacts.impl.SimpleDigestCalculator");
+      final Object calculator = sdcc.newInstance();
+
+      return constructor.newInstance(calculator);
+    } catch (Exception ignored) {
+    }
+    // It's not good.
+    fail("This tests works with TeamCity 8.0, 8.1. Please check api of your TeamCity and this tests sources.");
+    return null;
   }
 
   @BeforeMethod
@@ -106,6 +128,8 @@ public class StaticPageContentControllerTest extends BaseControllerTestCase {
     doGet();
     assertNotNull(myResponse.getContentType());
     assertNotNull(myResponse.getCharacterEncoding());
+    assertNotNull(myResponse.getHeaders("Content-Length"));
+    assertNotNull(myResponse.getHeader("ETag"));
     assertEquals("text/html", myResponse.getContentType());
     assertContains(myResponse.getReturnedContent(), "Static page content (from w1/widget.html)");
   }
@@ -149,7 +173,6 @@ public class StaticPageContentControllerTest extends BaseControllerTestCase {
   @Test
   public void testIllegalAccess() throws Exception {
     myRequest.setRequestURI("bs", "/app/static_content/../w1/widget.html");
-    myRequestDate = System.currentTimeMillis() - 10;
     doGet();
     assertEquals(404, myResponse.getStatus());
     assertTrue(StringUtil.isEmpty(myResponse.getReturnedContent()));

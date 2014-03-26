@@ -18,11 +18,11 @@ package jetbrains.buildServer.staticUIExtensions.web;
 
 import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.controllers.BaseController;
+import jetbrains.buildServer.controllers.HttpDownloadProcessor;
 import jetbrains.buildServer.web.util.WebUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.core.io.Resource;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.LastModified;
@@ -42,22 +42,20 @@ import java.io.IOException;
  * @author Vladislav.Rassokhin
  */
 public class StaticResourcesController extends BaseController implements LastModified {
+  @NotNull
+  private final HttpDownloadProcessor myHttpDownloadProcessor;
+
   public static interface ResourceProvider {
     @Nullable
     public Resource getResourceForPath(@NotNull final String path);
   }
 
   private static final Logger LOG = Logger.getInstance(StaticResourcesController.class.getName());
-  private static final String ENCODING = "UTF-8";
-  private static final String HEAD_METHOD = "HEAD";
 
   private ResourceProvider myProvider;
 
-  public StaticResourcesController() {
-  }
-
-  public StaticResourcesController(@NotNull final ResourceProvider provider) {
-    myProvider = provider;
+  public StaticResourcesController(@NotNull final HttpDownloadProcessor httpDownloadProcessor) {
+    myHttpDownloadProcessor = httpDownloadProcessor;
   }
 
   public void setProvider(@NotNull final ResourceProvider provider) {
@@ -93,36 +91,13 @@ public class StaticResourcesController extends BaseController implements LastMod
       return null;
     }
 
-    // check resource length
-    long length = resource.contentLength();
-    if (length > Integer.MAX_VALUE) {
-      throw new IOException("Resource content too long (beyond Integer.MAX_VALUE): " + resource);
-    }
-
-    // determine media type
-    final String mimeType = WebUtil.getMimeType(request, resource.getFilename());
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Determined media type [" + mimeType + "] for " + resource);
-    }
-
-    // headers
-    response.setContentLength((int) length);
-    response.setContentType(mimeType);
-    response.setCharacterEncoding(ENCODING);
-
     // check not modified
     if (new ServletWebRequest(request, response).checkNotModified(resource.lastModified())) {
       LOG.debug("Resource not modified - returning 304");
       return null;
     }
 
-    // content phase
-    if (HEAD_METHOD.equals(request.getMethod())) {
-      LOG.debug("HEAD request - skipping content");
-      return null;
-    }
-    FileCopyUtils.copy(resource.getInputStream(), response.getOutputStream());
-    return null;
+    return myHttpDownloadProcessor.processFileDownload(resource.getFile(), request, response);
   }
 
   @Nullable

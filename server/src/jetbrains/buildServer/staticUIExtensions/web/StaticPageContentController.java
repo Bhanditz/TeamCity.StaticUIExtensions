@@ -19,6 +19,7 @@ package jetbrains.buildServer.staticUIExtensions.web;
 
 import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.controllers.AuthorizationInterceptor;
+import jetbrains.buildServer.controllers.HttpDownloadProcessor;
 import jetbrains.buildServer.staticUIExtensions.Configuration;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
@@ -38,8 +39,9 @@ public class StaticPageContentController extends StaticResourcesController {
 
   public StaticPageContentController(@NotNull final AuthorizationInterceptor auth,
                                      @NotNull final WebControllerManager web,
-                                     @NotNull final Configuration config) {
-    super();
+                                     @NotNull final Configuration config,
+                                     @NotNull final HttpDownloadProcessor httpDownloadProcessor) {
+    super(httpDownloadProcessor);
     final File container = FileUtil.getCanonicalFile(new File(config.getIncludeFilesBase(), FOLDER_NAME));
     if (!container.isDirectory() || !container.exists()) {
       LOG.warn("Cannot found pages directory: " + container.getAbsolutePath());

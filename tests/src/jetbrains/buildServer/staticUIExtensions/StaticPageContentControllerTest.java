@@ -21,6 +21,7 @@ import jetbrains.buildServer.controllers.*;
 import jetbrains.buildServer.staticUIExtensions.web.StaticPageContentController;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
+import jetbrains.buildServer.web.util.WebUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jmock.Expectations;
@@ -148,6 +149,22 @@ public class StaticPageContentControllerTest extends BaseControllerTestCase {
   @Test
   public void testRequestWithParameters() throws Exception {
     myRequest.setRequestURI("bs", "/app/static_content/w1/widget.html?p1=1&p2=2");
+    doGet();
+    assertEquals("text/html", myResponse.getContentType());
+    assertContains(myResponse.getReturnedContent(), "Static page content (from w1/widget.html)");
+  }
+
+  @Test
+  public void testRequestWithGuestAuth() throws Exception {
+    myRequest.setRequestURI("bs", WebUtil.GUEST_AUTH_PREFIX + "app/static_content/w1/widget.html?p1=1&p2=2");
+    doGet();
+    assertEquals("text/html", myResponse.getContentType());
+    assertContains(myResponse.getReturnedContent(), "Static page content (from w1/widget.html)");
+  }
+
+  @Test
+  public void testRequestWithHttpAuth() throws Exception {
+    myRequest.setRequestURI("bs", WebUtil.HTTP_AUTH_PREFIX + "app/static_content/w1/widget.html?p1=1&p2=2");
     doGet();
     assertEquals("text/html", myResponse.getContentType());
     assertContains(myResponse.getReturnedContent(), "Static page content (from w1/widget.html)");

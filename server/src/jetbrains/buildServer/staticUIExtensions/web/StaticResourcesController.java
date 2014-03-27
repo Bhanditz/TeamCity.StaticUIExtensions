@@ -105,7 +105,7 @@ public class StaticResourcesController extends BaseController implements LastMod
     if (myProvider == null) {
       return null;
     }
-    final String path = WebUtil.getPathFromUrl(WebUtil.getOriginalPathWithoutContext(request));
+    final String path = WebUtil.getPathFromUrl(WebUtil.getOriginalPathWithoutAuthenticationType(request));
 
     if (LOG.isDebugEnabled()) {
       LOG.debug("Trying relative path [" + path + "]");

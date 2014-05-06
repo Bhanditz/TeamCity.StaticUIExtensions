@@ -141,7 +141,7 @@ public class StaticPageContentControllerTest extends BaseControllerTestCase {
     doGet();
     assertNotNull(myResponse.getContentType());
     assertNotNull(myResponse.getCharacterEncoding());
-    assertFalse("text/html".equals(myResponse.getContentType()));
+    assertEquals(getJsMimeType(), myResponse.getContentType());
     String returnedContent = myResponse.getReturnedContent();
     assertTrue(returnedContent.contains("alert('test alert');"));
   }
@@ -150,7 +150,7 @@ public class StaticPageContentControllerTest extends BaseControllerTestCase {
   public void testRequestWithParameters() throws Exception {
     myRequest.setRequestURI("bs", "/app/static_content/w1/widget.html?p1=1&p2=2");
     doGet();
-    assertEquals("text/html", myResponse.getContentType());
+    assertEquals(getHtmlMimeType(), myResponse.getContentType());
     assertContains(myResponse.getReturnedContent(), "Static page content (from w1/widget.html)");
   }
 
@@ -158,7 +158,7 @@ public class StaticPageContentControllerTest extends BaseControllerTestCase {
   public void testRequestWithGuestAuth() throws Exception {
     myRequest.setRequestURI("bs", WebUtil.GUEST_AUTH_PREFIX + "app/static_content/w1/widget.html?p1=1&p2=2");
     doGet();
-    assertEquals("text/html", myResponse.getContentType());
+    assertEquals(getHtmlMimeType(), myResponse.getContentType());
     assertContains(myResponse.getReturnedContent(), "Static page content (from w1/widget.html)");
   }
 
@@ -166,7 +166,7 @@ public class StaticPageContentControllerTest extends BaseControllerTestCase {
   public void testRequestWithHttpAuth() throws Exception {
     myRequest.setRequestURI("bs", WebUtil.HTTP_AUTH_PREFIX + "app/static_content/w1/widget.html?p1=1&p2=2");
     doGet();
-    assertEquals("text/html", myResponse.getContentType());
+    assertEquals(getHtmlMimeType(), myResponse.getContentType());
     assertContains(myResponse.getReturnedContent(), "Static page content (from w1/widget.html)");
   }
 
@@ -193,5 +193,19 @@ public class StaticPageContentControllerTest extends BaseControllerTestCase {
     doGet();
     assertEquals(404, myResponse.getStatus());
     assertTrue(StringUtil.isEmpty(myResponse.getReturnedContent()));
+  }
+
+  @Test
+  public void testServletContextMimeType() throws Exception {
+    assertEquals("text/html", getHtmlMimeType());
+  }
+
+
+  private String getHtmlMimeType() throws Exception {
+    return context.getMimeType("widget.html");
+  }
+
+  private String getJsMimeType() throws Exception {
+    return context.getMimeType("widget.js");
   }
 }

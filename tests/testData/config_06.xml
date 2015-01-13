@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<teamcity-static-ui-extensions>
+  <rule place-id="ALL_PAGES_HEADER" css-file="header.css">
+    <url equals=""/>
+    <url starts=""/>
+  </rule>
+</teamcity-static-ui-extensions>

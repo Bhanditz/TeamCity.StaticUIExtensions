@@ -9,6 +9,7 @@
       <class name="jetbrains.buildServer.staticUIExtensions.ConfigurationWatcherTest"/>
       <class name="jetbrains.buildServer.staticUIExtensions.ConfigurationListenerTest"/>
       <class name="jetbrains.buildServer.staticUIExtensions.StaticPageContentControllerTest"/>
+      <class name="jetbrains.buildServer.staticUIExtensions.StaticContentControllerTest"/>
     </classes>
   </test>
 </suite>

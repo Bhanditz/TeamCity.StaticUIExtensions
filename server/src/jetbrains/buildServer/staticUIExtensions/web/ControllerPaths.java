@@ -49,17 +49,44 @@ public class ControllerPaths {
     return "includeFile";
   }
 
+  @NotNull
+  public String getIncludeCssFileParameter() {
+    return "includeCssFile";
+  }
+
+  @NotNull
+  public String getIncludeJsFileParameter() {
+    return "includeJsFile";
+  }
+
   public String getEmptyContentParameter() {
     return "showEmptyContent";
   }
 
   @NotNull
-  public String getResourceControllerPath(@NotNull String resource) {
-    return getResourceControllerRegistrationBase() + "?" + getTokenParameter() + "=" + myConfig.getAccessToken() +"&" + getIncludeFileParameter() + "=" + resource;
+  public String getResourceControllerBasePath() {
+    return getResourceControllerRegistrationBase() + "?" + getTokenParameter() + "=" + myConfig.getAccessToken();
   }
 
   @NotNull
-  public String getResourceControllerPathEmpty() {
-    return getResourceControllerRegistrationBase() + "?" + getTokenParameter() + "=" + myConfig.getAccessToken() +"&" + getEmptyContentParameter() + "=42";
+  public String addHtmlToResourceControllerPath(@NotNull String path, @NotNull String resource) {
+    return path + "&" + getIncludeFileParameter() + "=" + resource;
   }
+
+  @NotNull
+  public String addCssToResourceControllerPath(@NotNull String path, @NotNull String resource) {
+    return path + "&" + getIncludeCssFileParameter() + "=" + resource;
+  }
+
+  @NotNull
+  public String addJsToResourceControllerPath(@NotNull String path, @NotNull String resource) {
+    return path + "&" + getIncludeJsFileParameter() + "=" + resource;
+  }
+
+  @NotNull
+  public String addEmptyContentControllerPath(@NotNull String path) {
+    return path + "&" + getEmptyContentParameter() + "=42";
+  }
+
+
 }

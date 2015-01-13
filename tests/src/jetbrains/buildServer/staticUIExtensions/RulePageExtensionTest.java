@@ -81,20 +81,6 @@ public class RulePageExtensionTest extends BaseTestCase {
     return myFactory.createExtension(rule);
   }
 
-  @Test
-  public void testHTMLResource() {
-    Rule r = new Rule(
-            "aaa",
-            new TrueMatcher(),
-            PlaceId.ALL_PAGES_HEADER,
-            new StaticContent("fff", "jjj", "ccc"));
-
-    final RulePageExtension ext = create(r);
-
-    Assert.assertEquals(ext.getCssPaths(), Arrays.asList("/base/resources.html?token=token&includeFile=ccc"));
-    Assert.assertEquals(ext.getJsPaths(), Arrays.asList("/base/resources.html?token=token&includeFile=jjj"));
-    Assert.assertEquals(ext.getIncludeUrl(), "/base/resources.html?token=token&includeFile=fff");
-  }
 
   @Test
   public void testHTMLResource2() {
@@ -109,6 +95,64 @@ public class RulePageExtensionTest extends BaseTestCase {
     Assert.assertEquals(ext.getCssPaths(), Collections.emptyList());
     Assert.assertEquals(ext.getJsPaths(), Collections.emptyList());
     Assert.assertEquals(ext.getIncludeUrl(), "/base/resources.html?token=token&showEmptyContent=42");
+  }
+
+
+  @Test
+  public void testCSSResource() {
+    Rule r = new Rule(
+            "aaa",
+            new TrueMatcher(),
+            PlaceId.ALL_PAGES_HEADER,
+            new StaticContent(null, null, "header.css"));
+
+    final RulePageExtension ext = create(r);
+
+    Assert.assertEquals(ext.getIncludeUrl(), "/base/resources.html?token=token&includeCssFile=header.css");
+    Assert.assertEquals(ext.getCssPaths(), Collections.emptyList());
+    Assert.assertEquals(ext.getJsPaths(), Collections.emptyList());
+  }
+
+
+  @Test
+  public void testJSResource() {
+    Rule r = new Rule(
+            "aaa",
+            new TrueMatcher(),
+            PlaceId.ALL_PAGES_HEADER,
+            new StaticContent(null, "main.js", null));
+
+    final RulePageExtension ext = create(r);
+
+    Assert.assertEquals(ext.getIncludeUrl(), "/base/resources.html?token=token&includeJsFile=main.js");
+    Assert.assertEquals(ext.getCssPaths(), Collections.emptyList());
+    Assert.assertEquals(ext.getJsPaths(), Collections.emptyList());
+  }
+
+  @Test
+  public void testHTMLResource() {
+    Rule r = new Rule(
+            "aaa",
+            new TrueMatcher(),
+            PlaceId.ALL_PAGES_HEADER,
+            new StaticContent("main.html", "main.js", "main.css"));
+
+    final RulePageExtension ext = create(r);
+
+    Assert.assertEquals(ext.getIncludeUrl(), "/base/resources.html?token=token&includeFile=main.html&includeJsFile=main.js&includeCssFile=main.css");
+  }
+
+  @Test
+  public void testEmptyHtmlWithCssAndJS() {
+    Rule r = new Rule(
+            "aaa",
+            new TrueMatcher(),
+            PlaceId.ALL_PAGES_HEADER,
+            new StaticContent(null, "main.js", "main.css"));
+
+    final RulePageExtension ext = create(r);
+
+    Assert.assertEquals(ext.getIncludeUrl(), "/base/resources.html?token=token&includeJsFile=main.js&includeCssFile=main.css");
   }
 
   @Test

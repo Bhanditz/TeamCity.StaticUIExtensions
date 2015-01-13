@@ -42,6 +42,9 @@ public class StaticContentController extends BaseController {
   private ControllerPaths myPaths;
   private final Configuration myConfig;
   private final StaticContentCache myCache;
+  private final ContentWrapper myCssWrapper = new ContentWrapper("\n<style type=\"text/css\">\n", "\n</style>\n");
+  private final ContentWrapper myJsWrapper = new ContentWrapper("\n<script type=\"text/javascript\">\n", "\n</script>\n");
+  private final ContentWrapper myHtmlWrapper = new ContentWrapper("", "");
 
   public StaticContentController(@NotNull final AuthorizationInterceptor auth,
                                  @NotNull final WebControllerManager web,
@@ -71,18 +74,36 @@ public class StaticContentController extends BaseController {
       return null;
     }
 
-    //TODO: allow directories, may use Util from TeamCity for that
-    final String file = request.getParameter(myPaths.getIncludeFileParameter());
-    if (StringUtil.isEmptyOrSpaces(file) || file.contains("/") || file.contains("\\") || file.contains("..")) {
-      final String message = "Failed to open file to include by invalid path: " + (file == null ? "no file specified" : file) + ".";
-      LOG.warn(message);
-      return sendError(request, response, message);
+    ModelAndView modelAndView = processFile(request.getParameter(myPaths.getIncludeCssFileParameter()), myCssWrapper, response);
+    if (modelAndView != null) {
+      return modelAndView;
+    }
+
+    modelAndView = processFile(request.getParameter(myPaths.getIncludeJsFileParameter()), myJsWrapper, response);
+    if (modelAndView != null) {
+      return modelAndView;
+    }
+
+    modelAndView = processFile(request.getParameter(myPaths.getIncludeFileParameter()), myHtmlWrapper, response);
+    if (modelAndView != null) {
+      return modelAndView;
+    }
+
+    return null;
+  }
+
+  private ModelAndView processFile(@Nullable String file,
+                                   @NotNull ContentWrapper wrapper,
+                                   @NotNull final HttpServletResponse response) throws IOException {
+
+    if (StringUtil.isEmptyOrSpaces(file)){
+      return null;
     }
 
     final File includeFile = myConfig.mapIncludeFilePath(file);
     if (includeFile == null || !includeFile.isFile()) {
       LOG.warn("Failed to open file to include: " + (includeFile != null ? includeFile : file) + ".");
-      return sendError(request, response, "Path not found: " + file);
+      return sendError(response, "Path not found: " + file);
     }
 
     final char[] data;
@@ -90,18 +111,38 @@ public class StaticContentController extends BaseController {
       data = myCache.getContent(includeFile);
     } catch (IOException e) {
       LOG.warn("Failed to open file to include: " + includeFile + ". " + e.getMessage(), e);
-      return sendError(request, response, "Failed to open file: " + includeFile.getName());
+      return sendError(response, "Failed to open file: " + includeFile.getName());
     }
 
-    response.getWriter().write(data);
+    wrapper.wrap(response, data);
+
     return null;
   }
 
   @Nullable
-  private ModelAndView sendError(@NotNull final HttpServletRequest request,
-                                 @NotNull final HttpServletResponse response,
+  private ModelAndView sendError(@NotNull final HttpServletResponse response,
                                  @NotNull final String errorMessage) throws IOException {
     response.getWriter().write("ERROR: Content for StaticUIExtensions plugin was not found. " + errorMessage);
     return null;
   }
+
+  private static class ContentWrapper {
+    @NotNull
+    private final String prefix;
+    @NotNull
+    private final String suffix;
+
+    private ContentWrapper(@NotNull String prefix, @NotNull String suffix) {
+      this.prefix = prefix;
+      this.suffix = suffix;
+    }
+
+    public void wrap(@NotNull final HttpServletResponse response, char[] data) throws IOException {
+      response.getWriter().write(prefix);
+      response.getWriter().write(data);
+      response.getWriter().write(suffix);
+    }
+  }
+
+
 }

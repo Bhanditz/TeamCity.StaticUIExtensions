@@ -139,9 +139,6 @@ public class StaticPageContentControllerTest extends BaseControllerTestCase {
   public void testJs() throws Exception {
     myRequest.setRequestURI("bs", "/app/static_content/w2/js/my.js");
     doGet();
-    assertNotNull(myResponse.getContentType());
-    assertNotNull(myResponse.getCharacterEncoding());
-    assertEquals(getJsMimeType(), myResponse.getContentType());
     String returnedContent = myResponse.getReturnedContent();
     assertTrue(returnedContent.contains("alert('test alert');"));
   }
@@ -205,7 +202,4 @@ public class StaticPageContentControllerTest extends BaseControllerTestCase {
     return context.getMimeType("widget.html");
   }
 
-  private String getJsMimeType() throws Exception {
-    return context.getMimeType("widget.js");
-  }
 }

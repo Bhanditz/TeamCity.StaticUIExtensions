@@ -25,8 +25,6 @@ import jetbrains.buildServer.web.util.WebUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Eugene Petrenko (eugene.petrenko@gmail.com)
@@ -48,22 +46,29 @@ public class RulePageExtension extends SimplePageExtension {
 
 
     final StaticContent content = rule.getContent();
+
+    String includeUrl = paths.getResourceControllerBasePath();
+
     final String html = content.getHTML();
     if (html != null) {
-      setIncludeUrl(paths.getResourceControllerPath(html));
-    } else {
-      setIncludeUrl(paths.getResourceControllerPathEmpty());
+      includeUrl = paths.addHtmlToResourceControllerPath(includeUrl, html);
     }
 
     final String js = content.getJS();
     if (js != null) {
-      addJsFile(paths.getResourceControllerPath(js));
+      includeUrl = paths.addJsToResourceControllerPath(includeUrl, js);
     }
 
     final String css = content.getCSS();
     if (css != null) {
-      addCssFile(paths.getResourceControllerPath(css));
+      includeUrl = paths.addCssToResourceControllerPath(includeUrl, css);
     }
+
+    if (html == null && js == null && css == null) {
+      includeUrl = paths.addEmptyContentControllerPath(includeUrl);
+    }
+
+    setIncludeUrl(includeUrl);
   }
 
   @Override

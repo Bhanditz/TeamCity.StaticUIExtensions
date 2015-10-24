@@ -61,6 +61,7 @@ Sample usages:
  - add google analytics to a TeamCity installation
  - add instance-specific info/announcement
  - patch TeamCity CSS/JS
+ - add static html widgets, e.g. Top Investigations, Build Status etc.
 
 
 2) To include static pages served separately
@@ -70,13 +71,3 @@ Place the content you want to serve into the
 [TeamCity Data Directory]/config/_static_ui_extensions/pages directory.
 
 The pages will be available under the /<TC context path>/app/static_content/
-
-Sample usages:
-==============
-- add static html widgets, e.g. Top Investigations, Build Status etc.
-
-
-
-
-
-

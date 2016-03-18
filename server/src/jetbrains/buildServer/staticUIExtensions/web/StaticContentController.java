@@ -107,7 +107,7 @@ public class StaticContentController extends BaseController {
         data = myCache.getContent(includeFile);
         wrapper.wrap(response, data);
       } catch (IOException e) {
-        LOG.warnAndDebugDetails("Failed to open file to include: " + includeFile, e);
+        LOG.warn("Failed to open file to include: " + includeFile + ", error: " + e.toString());
         return sendError(response, "Failed to open file: " + includeFile.getName());
       }
     }

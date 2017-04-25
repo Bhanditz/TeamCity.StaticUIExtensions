@@ -27,7 +27,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 
 public class StaticPageContentController extends StaticResourcesController {
@@ -74,6 +77,18 @@ public class StaticPageContentController extends StaticResourcesController {
     final String path = PUBLIC_STATIC_CONTENT_PAGES_PATH + "**";
     web.registerController(path, this);
     auth.addPathNotRequiringAuth(path);
+  }
+
+  @Nullable
+  @Override
+  protected ModelAndView doHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response) throws Exception {
+    Resource resource = getResourceToProcess(request, response);
+
+    if (resource == null){
+      return null;
+    }
+
+    return myHttpDownloadProcessor.processFileDownload(resource.getFile(), false, request, response, null);
   }
 }
 

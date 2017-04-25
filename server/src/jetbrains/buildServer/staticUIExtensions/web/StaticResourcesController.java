@@ -43,7 +43,7 @@ import java.io.IOException;
  */
 public class StaticResourcesController extends BaseController implements LastModified {
   @NotNull
-  private final HttpDownloadProcessor myHttpDownloadProcessor;
+  protected final HttpDownloadProcessor myHttpDownloadProcessor;
 
   public static interface ResourceProvider {
     @Nullable
@@ -79,6 +79,18 @@ public class StaticResourcesController extends BaseController implements LastMod
   @Nullable
   @Override
   protected ModelAndView doHandle(@NotNull final HttpServletRequest request, @NotNull final HttpServletResponse response) throws Exception {
+
+    Resource resource = getResourceToProcess(request, response);
+
+    if (resource == null){
+      return null;
+    }
+
+    return myHttpDownloadProcessor.processFileDownload(resource.getFile(), request, response);
+  }
+
+  @Nullable
+  protected Resource getResourceToProcess(@NotNull final HttpServletRequest request, @NotNull final HttpServletResponse response) throws Exception {
     if (myProvider == null) {
       throw new IllegalStateException("ResourcesProvider for StaticResourcesController [" + this + "] is null. Cannot dispatch request.");
     }
@@ -97,7 +109,7 @@ public class StaticResourcesController extends BaseController implements LastMod
       return null;
     }
 
-    return myHttpDownloadProcessor.processFileDownload(resource.getFile(), request, response);
+    return resource;
   }
 
   @Nullable

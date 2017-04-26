@@ -101,20 +101,21 @@ public class StaticContentController extends BaseController {
     }
 
     final File includeFile = myConfig.mapIncludeFilePath(file);
+    if (includeFile != null) {
+      final char[] data;
+      try {
+        data = myCache.getContent(includeFile);
+        wrapper.wrap(response, data);
+      } catch (IOException e) {
+        LOG.warn("Failed to open file to include: " + includeFile + ", error: " + e.toString());
+        return sendError(response, "Failed to open file: " + includeFile.getName());
+      }
+    }
+
     if (includeFile == null || !includeFile.isFile()) {
       LOG.warn("Failed to open file to include: " + (includeFile != null ? includeFile : file) + ".");
       return sendError(response, "Path not found: " + file);
     }
-
-    final char[] data;
-    try {
-      data = myCache.getContent(includeFile);
-    } catch (IOException e) {
-      LOG.warn("Failed to open file to include: " + includeFile + ". " + e.getMessage(), e);
-      return sendError(response, "Failed to open file: " + includeFile.getName());
-    }
-
-    wrapper.wrap(response, data);
 
     return null;
   }

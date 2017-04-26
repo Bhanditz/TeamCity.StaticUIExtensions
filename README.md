@@ -10,7 +10,7 @@ Apache 2.0
 
 Builds:
 =======
-Download the plugin from [teamcity.jetbrains.com]( http://teamcity.jetbrains.com/viewType.html?buildTypeId=TeamCityPluginsByJetBrains_StaticUiExtensionsAgainstTeamCity8)
+Download the plugin from [teamcity.jetbrains.com]( https://teamcity.jetbrains.com/viewType.html?buildTypeId=TeamCityPluginsByJetBrains_Unsorted_StaticUiExtensionsAgainstTeamCity90x)
 
 To build locally, open the project with IntelliJ IDEA, create the "plugin-zip" artifact. 
 You may also need to set up the TeamCityDistribution path variable in IDEA to point to the
@@ -61,6 +61,7 @@ Sample usages:
  - add google analytics to a TeamCity installation
  - add instance-specific info/announcement
  - patch TeamCity CSS/JS
+ - add static html widgets, e.g. Top Investigations, Build Status etc.
 
 
 2) To include static pages served separately
@@ -70,13 +71,3 @@ Place the content you want to serve into the
 [TeamCity Data Directory]/config/_static_ui_extensions/pages directory.
 
 The pages will be available under the /<TC context path>/app/static_content/
-
-Sample usages:
-==============
-- add static html widgets, e.g. Top Investigations, Build Status etc.
-
-
-
-
-
-

@@ -16,7 +16,10 @@
 
 package jetbrains.buildServer.staticUIExtensions;
 
-import jetbrains.buildServer.controllers.*;
+import jetbrains.buildServer.controllers.AuthorizationInterceptor;
+import jetbrains.buildServer.controllers.BaseController;
+import jetbrains.buildServer.controllers.BaseControllerTestCase;
+import jetbrains.buildServer.controllers.MockRequest;
 import jetbrains.buildServer.serverSide.MockServerPluginDescriptior;
 import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.staticUIExtensions.config.ConfigurationImpl;
@@ -36,7 +39,6 @@ import org.testng.annotations.Test;
 
 import javax.servlet.ServletContext;
 import java.io.File;
-import java.lang.reflect.Constructor;
 
 @Test
 public class StaticContentControllerTest extends BaseControllerTestCase {
@@ -139,7 +141,7 @@ public class StaticContentControllerTest extends BaseControllerTestCase {
   public void testIncludeWrongFileName() throws Exception {
     myRequest.setRequestURI("bs", "/overview.html");
     doGet("token", myConfig.getAccessToken(), "includeFile", "no_file.html");
-    assertContains(myResponse.getReturnedContent(), "ERROR: Content for StaticUIExtensions plugin was not found. Path not found: no_file.html");
+    assertContains(myResponse.getReturnedContent(), "ERROR: Content for StaticUIExtensions plugin was not found. Failed to open file: no_file.html");
   }
 
 

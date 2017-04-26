@@ -44,11 +44,7 @@ public class ConfigurationImpl implements Configuration {
   public File mapIncludeFilePath(@NotNull String path) {
     if (path.contains("/") || path.contains("\\") || path.contains("..")) return null;
 
-    final File map = new File(getIncludeFilesBase(), path);
-    if (map.isFile()) {
-      return map;
-    }
-    return null;
+    return new File(getIncludeFilesBase(), path);
   }
 
   @NotNull

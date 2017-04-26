@@ -107,9 +107,11 @@ public class StaticPageContentControllerTest extends BaseControllerTestCase {
     try {
       final Class<?> dcc = HttpDownloadProcessor.class.getClassLoader().loadClass("jetbrains.buildServer.artifacts.DigestCalculator");
       final Constructor<HttpDownloadProcessor> constructor = clazz.getConstructor(dcc);
+      Assert.assertNotNull(constructor);
 
       final Class<?> sdcc = dcc.getClassLoader().loadClass("jetbrains.buildServer.artifacts.impl.SimpleDigestCalculator");
       final Object calculator = sdcc.newInstance();
+      Assert.assertNotNull(calculator);
 
       return constructor.newInstance(calculator);
     } catch (Exception ignored) {
@@ -118,12 +120,15 @@ public class StaticPageContentControllerTest extends BaseControllerTestCase {
     try {
       final Class<?> dcc = HttpDownloadProcessor.class.getClassLoader().loadClass("jetbrains.buildServer.artifacts.DigestCalculator");
       final Constructor<HttpDownloadProcessor> constructor = clazz.getConstructor(dcc);
+      Assert.assertNotNull(constructor);
 
       final Class<?> sdcc = dcc.getClassLoader().loadClass("jetbrains.buildServer.artifacts.impl.SimpleDigestCalculator");
       final Object calculator = sdcc.newInstance();
+      Assert.assertNotNull(constructor);
 
       Class<?> epc = dcc.getClassLoader().loadClass("jetbrains.buildServer.serverSide.impl.BuildServerServiceLocator");
       final Object extensionProvider = epc.newInstance();
+      Assert.assertNotNull(extensionProvider);
 
       return constructor.newInstance(calculator, extensionProvider);
     } catch (Exception ignored) {

@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.springframework.mock.web.MockServletContext;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -102,7 +103,7 @@ public class StaticPageContentControllerTest extends BaseControllerTestCase {
       return constructor.newInstance();
     } catch (Exception ignored) {
     }
-    // TC 8.1 and probably newer versions: jetbrains.buildServer.artifacts.DigestCalculator required.
+    // TC 8.1 up to 2017.1
     try {
       final Class<?> dcc = HttpDownloadProcessor.class.getClassLoader().loadClass("jetbrains.buildServer.artifacts.DigestCalculator");
       final Constructor<HttpDownloadProcessor> constructor = clazz.getConstructor(dcc);
@@ -111,6 +112,20 @@ public class StaticPageContentControllerTest extends BaseControllerTestCase {
       final Object calculator = sdcc.newInstance();
 
       return constructor.newInstance(calculator);
+    } catch (Exception ignored) {
+    }
+    // TC 2017.1
+    try {
+      final Class<?> dcc = HttpDownloadProcessor.class.getClassLoader().loadClass("jetbrains.buildServer.artifacts.DigestCalculator");
+      final Constructor<HttpDownloadProcessor> constructor = clazz.getConstructor(dcc);
+
+      final Class<?> sdcc = dcc.getClassLoader().loadClass("jetbrains.buildServer.artifacts.impl.SimpleDigestCalculator");
+      final Object calculator = sdcc.newInstance();
+
+      Class<?> epc = dcc.getClassLoader().loadClass("jetbrains.buildServer.serverSide.impl.BuildServerServiceLocator");
+      final Object extensionProvider = epc.newInstance();
+
+      return constructor.newInstance(calculator, extensionProvider);
     } catch (Exception ignored) {
     }
     // It's not good.

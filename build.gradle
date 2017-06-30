@@ -1,10 +1,42 @@
-
 plugins {
-  id "com.github.rodm.teamcity-server" version "1.0"
+    id "java"
+    id "com.github.rodm.teamcity-server" version "1.0"
 }
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '4.0'
+    gradleVersion = '4.0'
 }
 
+final String teamcityVersion = '2017.1'
 
+dependencies {
+    compileOnly "org.jetbrains.teamcity.internal:web:${teamcityVersion}"
+}
+
+test {
+    useTestNG()
+}
+
+sourceCompatibility = "1.6"
+targetCompatibility = "1.6"
+
+teamcity {
+    // Use TeamCity 8.1 API
+    version = teamcityVersion
+
+    // Plugin descriptor
+    server {
+        descriptor {
+            // required properties
+            name = 'StaticUIExtensions'
+            displayName = 'Static UI Extensions'
+            version = project.version
+            vendorName = 'JetBrains, s.r.o.'
+
+            description = 'Adds static content to TeamCity pages'
+
+            vendorUrl = 'https://jetbrains.com'
+            useSeparateClassloader = true
+        }
+    }
+}

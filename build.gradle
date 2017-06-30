@@ -7,7 +7,11 @@ task wrapper(type: Wrapper) {
     gradleVersion = '4.0'
 }
 
-final String teamcityVersion = '2017.1'
+final String buildVersion = hasProperty('teamcity.build.number') ? property('teamcity.build.number') : 'SNAPSHOT'
+final String teamcityVersion = hasProperty('teamcity.version') ? property('teamcity.version') : '2017.1'
+
+project.version = buildVersion
+project.group = 'static-ui-extensions'
 
 dependencies {
     compileOnly "org.jetbrains.teamcity.internal:web:${teamcityVersion}"
@@ -30,7 +34,7 @@ teamcity {
             // required properties
             name = 'StaticUIExtensions'
             displayName = 'Static UI Extensions'
-            version = project.version
+            version = buildVersion
             vendorName = 'JetBrains, s.r.o.'
 
             description = 'Adds static content to TeamCity pages'

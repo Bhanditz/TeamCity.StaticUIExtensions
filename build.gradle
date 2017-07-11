@@ -13,8 +13,16 @@ final String teamcityVersion = hasProperty('teamcity.version') ? property('teamc
 project.version = buildVersion
 project.group = 'static-ui-extensions'
 
+repositories {
+    jcenter()
+}
+
 dependencies {
     compileOnly "org.jetbrains.teamcity.internal:web:${teamcityVersion}"
+
+    testCompile "org.jetbrains.teamcity.internal:web:${teamcityVersion}"
+    testCompile "org.jetbrains.teamcity:tests-support:${teamcityVersion}"
+    testCompile 'org.springframework:spring-test:4.2.6.RELEASE'
 }
 
 test {
@@ -27,6 +35,12 @@ targetCompatibility = "1.6"
 teamcity {
     // Use TeamCity 8.1 API
     version = teamcityVersion
+
+    environments {
+        current {
+            version = teamcityVersion
+        }
+    }
 
     // Plugin descriptor
     server {

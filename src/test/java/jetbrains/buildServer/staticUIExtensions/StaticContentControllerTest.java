@@ -16,142 +16,68 @@
 
 package jetbrains.buildServer.staticUIExtensions;
 
-import jetbrains.buildServer.controllers.AuthorizationInterceptor;
-import jetbrains.buildServer.controllers.BaseController;
-import jetbrains.buildServer.controllers.BaseControllerTestCase;
-import jetbrains.buildServer.controllers.MockRequest;
-import jetbrains.buildServer.serverSide.MockServerPluginDescriptior;
-import jetbrains.buildServer.serverSide.ServerPaths;
-import jetbrains.buildServer.staticUIExtensions.config.ConfigurationImpl;
-import jetbrains.buildServer.staticUIExtensions.config.ConfigurationReader;
-import jetbrains.buildServer.staticUIExtensions.config.ConfigurationReaderImpl;
-import jetbrains.buildServer.staticUIExtensions.web.ControllerPaths;
-import jetbrains.buildServer.staticUIExtensions.web.StaticContentCache;
-import jetbrains.buildServer.staticUIExtensions.web.StaticContentController;
-import jetbrains.buildServer.util.FileUtil;
-import jetbrains.buildServer.web.openapi.WebControllerManager;
-import org.jetbrains.annotations.NotNull;
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.springframework.mock.web.MockServletContext;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import javax.servlet.ServletContext;
 import java.io.File;
 
+import static jetbrains.buildServer.TeamCityAsserts.assertContains;
+import static jetbrains.buildServer.TeamCityAsserts.assertNotContains;
+
 @Test
-public class StaticContentControllerTest extends BaseControllerTestCase {
-
-  private AuthorizationInterceptor auth;
-  private WebControllerManager web;
-  private ServletContext context;
-  private long myRequestDate;
-  private ConfigurationReader myReader;
-  private PagePlacesCollector myCollector;
-  private ConfigurationImpl myConfig;
-
-
-  @BeforeMethod
+public class StaticContentControllerTest extends ContentControllerTestBase {
   @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    myCollector = new PagePlacesCollector();
-    myReader = new ConfigurationReaderImpl(myCollector);
-  }
-
-
-  @Override
-  protected BaseController createController() {
-    Mockery m = new Mockery();
-
-    context = new MockServletContext();
-
-
-    myConfig = new ConfigurationImpl(new ServerPaths("root")) {
-      @NotNull
-      public File getIncludeFilesBase() {
-        return FileUtil.getCanonicalFile(new File("./tests/testData/test1"));
-      }
-    };
-    web = m.mock(WebControllerManager.class);
-    auth = m.mock(AuthorizationInterceptor.class);
-
-    myRequest = new MockRequest() {
-      public ServletContext getServletContext() {
-        return context;
-      }
-
-      @Override
-      public long getDateHeader(String string) {
-        return myRequestDate;
-      }
-    };
-
-
-    m.checking(new Expectations() {{
-      allowing(web);
-      allowing(auth);
-    }});
-
-    return new StaticContentController(auth, web, new ControllerPaths(new MockServerPluginDescriptior(), myConfig), myConfig, new StaticContentCache());
-  }
-
-  @BeforeMethod
-  public void cleanup() {
-    myRequestDate = -1;
+  protected File getIncludeFilesBase() {
+    return new File("./tests/testData/test1");
   }
 
   @Test
   public void testIncludeCss() throws Exception {
-    myRequest.setRequestURI("bs", "/overview.html");
+    setRequestURI("bs", "/overview.html", "includeCssFile", "header.css");
 
-    doGet("token", myConfig.getAccessToken(), "includeCssFile", "header.css");
-    assertContains(myResponse.getReturnedContent(), "background-color: red;");
-    assertContains(myResponse.getReturnedContent(), "<style type=\"text/css\">");
+    doGet();
+    assertContains(myResponse.getContentAsString(), "background-color: red;");
+    assertContains(myResponse.getContentAsString(), "<style type=\"text/css\">");
   }
 
   @Test
   public void testIncludeJs() throws Exception {
-    myRequest.setRequestURI("bs", "/overview.html");
+    setRequestURI("bs", "/overview.html", "includeJsFile", "main.js");
 
-    doGet("token", myConfig.getAccessToken(), "includeJsFile", "main.js");
-    assertContains(myResponse.getReturnedContent(), "alert('hi from main.js');");
-    assertContains(myResponse.getReturnedContent(), "<script type=\"text/javascript\">");
+    doGet();
+    assertContains(myResponse.getContentAsString(), "alert('hi from main.js');");
+    assertContains(myResponse.getContentAsString(), "<script type=\"text/javascript\">");
   }
 
 
   @Test
   public void testIncludeHtml() throws Exception {
-    myRequest.setRequestURI("bs", "/overview.html");
-    doGet("token", myConfig.getAccessToken(), "includeFile", "part.html");
-    assertContains(myResponse.getReturnedContent(), "contented included by static ui plugin");
-    assertNotContains(myResponse.getReturnedContent(), "<script type=\"text/javascript\">", false);
+    setRequestURI("bs", "/overview.html", "includeFile", "part.html");
+    doGet();
+    assertContains(myResponse.getContentAsString(), "contented included by static ui plugin");
+    assertNotContains(myResponse.getContentAsString(), "<script type=\"text/javascript\">", false);
   }
 
   @Test
   public void testIncludeEmptyHtml() throws Exception {
-    myRequest.setRequestURI("bs", "/overview.html");
-    doGet("token", myConfig.getAccessToken(), "includeFile", "");
-    assertNotContains(myResponse.getReturnedContent(), "ERROR: Content for StaticUIExtensions plugin was not found. No file specified.", false);
+    setRequestURI("bs", "/overview.html", "includeFile", "");
+    doGet();
+    assertNotContains(myResponse.getContentAsString(), "ERROR: Content for StaticUIExtensions plugin was not found. No file specified.", false);
   }
 
 
   @Test
   public void testIncludeWrongFileName() throws Exception {
-    myRequest.setRequestURI("bs", "/overview.html");
-    doGet("token", myConfig.getAccessToken(), "includeFile", "no_file.html");
-    assertContains(myResponse.getReturnedContent(), "ERROR: Content for StaticUIExtensions plugin was not found. Failed to open file: no_file.html");
+    setRequestURI("bs", "/overview.html", "includeFile", "no_file.html");
+    doGet();
+    assertContains(myResponse.getContentAsString(), "ERROR: Content for StaticUIExtensions plugin was not found. Failed to open file: no_file.html");
   }
 
 
   @Test
   public void testIncludeEmptyHtmlAndCss() throws Exception {
-    myRequest.setRequestURI("bs", "/overview.html");
-    doGet("token", myConfig.getAccessToken(), "includeFile", "", "includeCssFile", "header.css");
-    assertContains(myResponse.getReturnedContent(), "background-color: red;");
-    assertContains(myResponse.getReturnedContent(), "<style type=\"text/css\">");
+    setRequestURI("bs", "/overview.html", "includeFile", "", "includeCssFile", "header.css");
+    doGet();
+    assertContains(myResponse.getContentAsString(), "background-color: red;");
+    assertContains(myResponse.getContentAsString(), "<style type=\"text/css\">");
   }
-
-
 }

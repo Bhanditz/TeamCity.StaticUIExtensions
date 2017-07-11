@@ -43,7 +43,7 @@ public class StaticPageContentController extends StaticResourcesController {
   public StaticPageContentController(@NotNull final AuthorizationInterceptor auth,
                                      @NotNull final WebControllerManager web,
                                      @NotNull final Configuration config,
-                                     @NotNull final HttpDownloadProcessor httpDownloadProcessor) {
+                                     @NotNull final DownloadProcessor httpDownloadProcessor) {
     super(httpDownloadProcessor);
     final File container = FileUtil.getCanonicalFile(new File(config.getIncludeFilesBase(), FOLDER_NAME));
     if (!container.exists()) {
@@ -88,7 +88,7 @@ public class StaticPageContentController extends StaticResourcesController {
       return null;
     }
 
-    return myHttpDownloadProcessor.processFileDownload(resource.getFile(), false, request, response, null);
+    return myHttpDownloadProcessor.processFileDownload(resource.getFile(), false, request, response);
   }
 }
 

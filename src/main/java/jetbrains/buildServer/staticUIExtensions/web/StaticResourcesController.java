@@ -18,7 +18,6 @@ package jetbrains.buildServer.staticUIExtensions.web;
 
 import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.controllers.BaseController;
-import jetbrains.buildServer.controllers.HttpDownloadProcessor;
 import jetbrains.buildServer.web.util.WebUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +42,7 @@ import java.io.IOException;
  */
 public class StaticResourcesController extends BaseController implements LastModified {
   @NotNull
-  protected final HttpDownloadProcessor myHttpDownloadProcessor;
+  protected final DownloadProcessor myHttpDownloadProcessor;
 
   public static interface ResourceProvider {
     @Nullable
@@ -54,7 +53,7 @@ public class StaticResourcesController extends BaseController implements LastMod
 
   private ResourceProvider myProvider;
 
-  public StaticResourcesController(@NotNull final HttpDownloadProcessor httpDownloadProcessor) {
+  public StaticResourcesController(@NotNull final DownloadProcessor httpDownloadProcessor) {
     myHttpDownloadProcessor = httpDownloadProcessor;
   }
 
@@ -86,7 +85,7 @@ public class StaticResourcesController extends BaseController implements LastMod
       return null;
     }
 
-    return myHttpDownloadProcessor.processFileDownload(resource.getFile(), request, response);
+    return myHttpDownloadProcessor.processFileDownload(resource.getFile(), true, request, response);
   }
 
   @Nullable

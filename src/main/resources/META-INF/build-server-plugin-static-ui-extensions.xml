@@ -29,5 +29,7 @@
 
   <bean class="jetbrains.buildServer.staticUIExtensions.web.StaticContentCacheRegistrar"/>
 
+  <bean class="jetbrains.buildServer.staticUIExtensions.web.DownloadProcessorImpl"/>
+
 </beans>
 
